@@ -50,10 +50,3 @@ body{
   font-size: 16px;
   margin-right: 10px;
 }
-
-.Categoria ul li a:hover{
-  background: grey;
-  border-left: 5px solid lightblue;
-  transition: all 0.55s;
-  color: white;
-}
