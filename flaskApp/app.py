@@ -22,7 +22,7 @@ class User(Resource):
     @app.route('/logs/', methods = ['GET'])
     def get():
         date = date_to_epoch(2018, 11, 26, 0, 0)
-        data = dumps(cuentas.find({"timepstamp":{'$gt' :1543271018765}}))
+        data = dumps(cuentas.find())
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
 
