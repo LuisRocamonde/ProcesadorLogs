@@ -20,16 +20,20 @@ def date_to_epoch(ano, mes, dia, hora, min):
 class User(Resource):
 
     @app.route('/logs/', methods = ['GET'])
-    def get():
+    def log():
         date = date_to_epoch(2018, 11, 26, 0, 0)
-        data = dumps(cuentas.find())
+        data = dumps(cuentas.find({"timestamp": 1543271005520}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
-
         return data
 
+    @app.route('/test/', methods = ['GET'])
+    def test():
+        print("Test")
+        return "OK"
 
 
-api.add_resource(User, "/logs/")
+
+api.add_resource(User, "/test/")
 
 app.run(debug=True)

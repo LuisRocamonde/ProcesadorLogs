@@ -13,12 +13,18 @@ class App extends Component {
 
   //Elimina los valores nulos de los atributos del log
   eliminarNulos(log){
-    console.log(log)
     for(var key in log){
       if(log[key]==null){
         log[key]=""
       }
     }
+  }
+
+  handleClick(event){
+    event.preventDefault();
+    fetch('http://127.0.0.1:5000/test/',{'mode': 'no-cors'}).then(res => {
+        return res;
+    }).catch(err => err);
   }
 
   //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
@@ -45,10 +51,11 @@ class App extends Component {
       .then(res => res.json())
       .then(
         (result) => {
+
           this.setState({
             logs: result
           });
-        console.log(result);},
+        ;},
         (error) => {
           this.setState({
             error
@@ -70,10 +77,14 @@ class App extends Component {
           <div className="App">
           {logs.map(log => (
             <ul>
-            <Categoria name={log.elementReference} items={this.arrayElementos(log)} icon="file-text-o"/>
+             <Categoria name="Frameworks" items={["Express", "Hibernate", "Spring"]} icon="cube"/>
             </ul>
             ))}
+            <button onClick={this.handleClick.bind(this)}>
+            CLICKeAME
+            </button>
           </div>
+
         );
       } else if(isLoaded){
 
