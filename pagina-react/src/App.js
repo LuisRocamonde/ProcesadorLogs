@@ -53,7 +53,7 @@ class App extends Component {
         (result) => {
 
           this.setState({
-            logs: result
+            logs: JSON.parse(result)
           });
         ;},
         (error) => {

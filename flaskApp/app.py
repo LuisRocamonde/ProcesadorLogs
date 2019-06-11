@@ -25,7 +25,7 @@ class User(Resource):
         data = dumps(cuentas.find({"timestamp": 1543271005520}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
-        return data
+        return resp
 
     @app.route('/test/', methods = ['GET'])
     def test():
@@ -34,6 +34,6 @@ class User(Resource):
 
 
 
-api.add_resource(User, "/test/")
+api.add_resource(User, "/logs/")
 
 app.run(debug=True)
