@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Categoria from './Categoria'
 import './App.css'
+import web3 from 'web3'
 
 class App extends Component {
   constructor(props) {
@@ -22,13 +23,17 @@ class App extends Component {
 
 //Envia datos al servidor
   handleClick(hash){
+    const dataString = JSON.stringify(hash)
+    const hashedMessage = web3.keccak256("dataString");
+    console.log(hashedMessage)
+    //const signedHash = account.sign(hashedMessage);
     fetch('http://127.0.0.1:5000/test/' + hash,{'mode': 'no-cors', method: 'POST'})
   }
 
   //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
   arrayElementos(log){
     var elementos = []
-    log["value"] = this.parsearValue(log["value"])
+    //log["value"] = this.parsearValue(log["value"])
     log["_id"]= log["_id"]["$oid"]
     for(var key in log){
         elementos.push(log[key])
@@ -38,8 +43,10 @@ class App extends Component {
 
   //Parsea el string del atributo "value" para devolver solo el valor actual
   parsearValue(value){
-    var string = value.split("\"stringValue\":\"")
-    var valueParseado = string[1].split("\"")
+    console.log("STRING" + value)
+    var string = value.split("\"booleanValue\":")
+
+    var valueParseado = string[1].split(",\"")
 
     return valueParseado[0]
   }
@@ -75,11 +82,11 @@ class App extends Component {
           <div className="App">
           {logs.map(log => (
             <ul>
-             <Categoria name="Frameworks" items={["Express", "Hibernate", "Spring"]} icon="cube"/>
+             <Categoria name={log["timestamp"]} items={this.arrayElementos(log)} icon="cube"/>
             </ul>
             ))}
             <button onClick={this.handleClick.bind(this, 'TINO')}>
-            CLICKeAME
+            CLICKEAME
             </button>
           </div>
 
