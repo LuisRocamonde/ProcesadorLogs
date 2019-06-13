@@ -27,9 +27,9 @@ class User(Resource):
         resp = Response(js, status=200, mimetype='application/json')
         return resp
 
-    @app.route('/test/', methods = ['GET'])
-    def test():
-        print("Test")
+    @app.route('/test/<hash>', methods = ['POST'])
+    def test(hash):
+        print(hash)
         return "OK"
 
 

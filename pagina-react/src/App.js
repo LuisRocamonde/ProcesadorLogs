@@ -20,11 +20,9 @@ class App extends Component {
     }
   }
 
-  handleClick(event){
-    event.preventDefault();
-    fetch('http://127.0.0.1:5000/test/',{'mode': 'no-cors'}).then(res => {
-        return res;
-    }).catch(err => err);
+//Envia datos al servidor
+  handleClick(hash){
+    fetch('http://127.0.0.1:5000/test/' + hash,{'mode': 'no-cors', method: 'POST'})
   }
 
   //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
@@ -80,7 +78,7 @@ class App extends Component {
              <Categoria name="Frameworks" items={["Express", "Hibernate", "Spring"]} icon="cube"/>
             </ul>
             ))}
-            <button onClick={this.handleClick.bind(this)}>
+            <button onClick={this.handleClick.bind(this, 'TINO')}>
             CLICKeAME
             </button>
           </div>
