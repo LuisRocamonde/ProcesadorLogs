@@ -23,9 +23,9 @@ class App extends Component {
 
 //Envia datos al servidor
   handleClick(hash){
-    const dataString = JSON.stringify(hash)
-    const hashedMessage = web3.keccak256("dataString");
-    console.log(hashedMessage)
+    //const dataString = JSON.stringify(hash)
+    //const hashedMessage = web3.keccak256("dataString");
+    //console.log(hashedMessage)
     //const signedHash = account.sign(hashedMessage);
     fetch('http://127.0.0.1:5000/test/' + hash,{'mode': 'no-cors', method: 'POST'})
   }
@@ -33,7 +33,8 @@ class App extends Component {
   //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
   arrayElementos(log){
     var elementos = []
-    console.log(JSON.parse(log["value"]))
+    var valorNuevo = JSON.parse(log["value"])
+    console.log(valorNuevo)
     //log["value"].map(datos =>(console.log("DATOS "+datos)))
     log["_id"]= log["_id"]["$oid"]
     for(var key in log){
@@ -68,6 +69,9 @@ class App extends Component {
     }
     else{
       if(logs){
+        console.log(logs)
+        var copy = JSON.parse(JSON.stringify(logs))
+        console.log(copy)
         logs.map(log =>(this.eliminarNulos(log)))
         return (
           <div className="App">
@@ -76,7 +80,7 @@ class App extends Component {
              <Categoria name={log["timestamp"]} items={this.arrayElementos(log)} icon="cube"/>
             </ul>
             ))}
-            <button onClick={this.handleClick.bind(this, 'TINO')}>
+            <button onClick={this.handleClick.bind(this, JSON.stringify(copy))}>
             CLICKEAME
             </button>
           </div>
