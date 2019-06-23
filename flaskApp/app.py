@@ -6,6 +6,7 @@ from pymongo import MongoClient
 import sys
 from bson.json_util import dumps
 import datetime
+from datetime import timedelta
 import easyweb3
 from easyweb3 import EasyWeb3
 from eth_account.messages import defunct_hash_message
@@ -18,17 +19,24 @@ db = con.procardiaLogs
 cuentas= db.logs
 EasyWeb3()
 
-def date_to_epoch(ano, mes, dia, hora, min):
-    return datetime.datetime(ano, mes, dia, hora, min).timestamp()
+def date1_to_epoch(data):
+    return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
+
+def date2_to_epoch(data):
+    data = data + timedelta(days=1)
+    return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
 
 class User(Resource):
 
 
-
+#1543271005520
     @app.route('/logs/', methods = ['GET'])
     def log():
-        date = date_to_epoch(2018, 11, 26, 0, 0)
-        data = dumps(cuentas.find({"timestamp": 1543271003852}))
+        ahora = datetime.datetime.now()
+        principioDia = date1_to_epoch(ahora)
+        finalDia = date2_to_epoch(ahora)
+        
+        data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
         return resp

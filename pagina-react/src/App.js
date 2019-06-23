@@ -38,7 +38,7 @@ class App extends Component {
     //log["value"].map(datos =>(console.log("DATOS "+datos)))
     log["_id"]= log["_id"]["$oid"]
     for(var key in log){
-        elementos.push(log[key])
+        elementos.push(key + " -> " + log[key])
     }
     return elementos
   }
@@ -81,7 +81,7 @@ class App extends Component {
             </ul>
             ))}
             <button onClick={this.handleClick.bind(this, JSON.stringify(copy))}>
-            CLICKEAME
+            Firmar cambios
             </button>
           </div>
 

@@ -10,9 +10,10 @@ body{
 .App{
   width: 100%;
   background: white;
-  width: 420px;
+  width: 600px;
   margin: 100px auto 0 auto;
   color: white;
+
   border-radius: 16px;
   box-shadow:
       0 5px 15px 1px rgba(0,0,0,0.6),
@@ -34,6 +35,11 @@ body{
   margin: 0px;
   background: black;
   cursor: pointer;
+}
+
+.App button{
+  margin-left: 15px;
+  margin-bottom: 5px;
 }
 
 .Categoria ul li a{
