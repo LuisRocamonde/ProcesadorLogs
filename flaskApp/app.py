@@ -33,9 +33,10 @@ class User(Resource):
     @app.route('/logs/', methods = ['GET'])
     def log():
         ahora = datetime.datetime.now()
-        principioDia = date1_to_epoch(ahora)
-        finalDia = date2_to_epoch(ahora)
-        
+        principioDia = 1543271003852#date1_to_epoch(ahora)
+
+        finalDia = 1543271021191#date2_to_epoch(ahora)
+        #data = dumps(cuentas.find({"timestamp": 1543271003852}))
         data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')

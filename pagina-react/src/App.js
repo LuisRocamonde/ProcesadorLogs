@@ -30,16 +30,31 @@ class App extends Component {
     fetch('http://127.0.0.1:5000/test/' + hash,{'mode': 'no-cors', method: 'POST'})
   }
 
+  isEmpty(obj) {
+      for(var key in obj) {
+          if(obj.hasOwnProperty(key))
+              return false;
+      }
+      return true;
+  }
+
   //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
   arrayElementos(log){
     var elementos = []
     var valorNuevo = JSON.parse(log["value"])
-    console.log(valorNuevo)
-    //log["value"].map(datos =>(console.log("DATOS "+datos)))
-    log["_id"]= log["_id"]["$oid"]
-    for(var key in log){
-        elementos.push(key + " -> " + log[key])
+    if(!this.isEmpty(valorNuevo)){
+      console.log(log["value"])
+      var valor = Object.entries(valorNuevo[0])
+      log["value"] = valor[1].toString().substring(valor[1].toString().indexOf(',')+1);
+    } else{
+      log["value"] = "null"
     }
+      log["_id"]= log["_id"]["$oid"]
+      for(var key in log){
+          elementos.push(key + " -> " + log[key])
+      }
+
+
     return elementos
   }
 
@@ -69,9 +84,6 @@ class App extends Component {
     }
     else{
       if(logs){
-        console.log(logs)
-        var copy = JSON.parse(JSON.stringify(logs))
-        console.log(copy)
         logs.map(log =>(this.eliminarNulos(log)))
         return (
           <div className="App">
@@ -80,7 +92,7 @@ class App extends Component {
              <Categoria name={log["timestamp"]} items={this.arrayElementos(log)} icon="cube"/>
             </ul>
             ))}
-            <button onClick={this.handleClick.bind(this, JSON.stringify(copy))}>
+            <button onClick={this.handleClick.bind(this, JSON.stringify(logs))}>
             Firmar cambios
             </button>
           </div>

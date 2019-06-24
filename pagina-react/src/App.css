@@ -10,7 +10,7 @@ body{
 .App{
   width: 100%;
   background: white;
-  width: 600px;
+  width: 900px;
   margin: 100px auto 0 auto;
   color: white;
 
@@ -38,8 +38,19 @@ body{
 }
 
 .App button{
+  padding-left: 5px;
+  padding-right: 5px;
   margin-left: 15px;
   margin-bottom: 5px;
+  border-radius: 8px;
+  background-color: white;
+  color: black;
+  transition-duration: 0.4s;
+}
+
+.App button:hover{
+  background-color: black;
+  color: white;
 }
 
 .Categoria ul li a{
