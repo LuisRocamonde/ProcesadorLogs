@@ -10,9 +10,38 @@ class App extends Component {
       logeado : false,
       control : -1,
       error: null,
-      logs: []
+      logs: [],
+      valueNombre: '',
+      valuePass: '',
+      nombreCorrecto:'luisr',
+      passCorrecta:'login'
     };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange2 = this.handleChange2.bind(this);
   }
+
+  handleChange(event) {
+  this.setState({valueNombre: event.target.value});
+}
+
+  handleSubmit(event) {
+    if(this.state.valueNombre==this.state.nombreCorrecto && this.state.valuePass==this.state.passCorrecta){
+      this.setState({
+        logeado: true
+      });
+    } else{
+      alert('PATRAS' + this.state.valuePass);
+    }
+
+    event.preventDefault();
+  }
+
+  handleChange2(event) {
+  this.setState({valuePass: event.target.value});
+  }
+
 
   //Elimina los valores nulos de los atributos del log
   eliminarNulos(log){
@@ -87,36 +116,6 @@ epochToDate(date){
       )
   }
 
-  funcionSubmit(user){
-    console.log(user)
-  /*  if(this.state["control"] > 3){
-      console.log("SUBMIT");
-      this.setState({
-        logeado: true
-      });
-    } else{
-      console.log("CONTROLSUB");
-      console.log(this.state["control"])
-      this.setState({
-        control: this.state["control"] + 1
-      });
-    }*/
-  }
-
-  desloguear(){
-    var control = false;
-    if(control){
-      console.log("FUERA");
-      this.setState({
-        logeado: false
-      });
-    } else{
-      control = true;
-      console.log("CONTROL");
-    }
-
-  }
-
   obtenerMedico(logs){
     var medico = "";
     logs.map(log => (medico = log["agent"]))
@@ -138,8 +137,7 @@ epochToDate(date){
             <ul className="horizontal">
 
               <li>{this.obtenerMedico(logs)}</li>
-              <li class="rightli" style={{float:'right'}}>Ultima firma</li>
-              <li><button onClick={this.desloguear()}>FUERA</button></li>
+              <li className="rightli" style={{float:'right'}}>Ultima firma</li>
             </ul>
             {logs.map(log => (
               <ul>
@@ -168,11 +166,11 @@ epochToDate(date){
             <li className="rightli" style={{float:'right'}}>Ultima firma</li>
           </ul>
 
-            <form className="formulario" onSubmit={this.funcionSubmit(document.getElementById("user"))}>
+            <form className="formulario" onSubmit={this.handleSubmit}>
               <label className="labelUsuario">Usuario</label>
-              <input className="textoUsuario" type="text" id="user" name="user" required size="20"/>
+              <input className="textoUsuario" type="text" value={this.state.valueNombre} onChange={this.handleChange} required size="20"/>
               <label className="labelContraseña">Contraseña</label>
-              <input className="textoContraseña" type="password" id="pass" name="pass" required size="20"/>
+              <input className="textoContraseña" type="password" value={this.state.valuePass} onChange={this.handleChange2} required size="20"/>
               <input className="submit" type="submit" value="Iniciar Sesion"/>
             </form>
           </div>
