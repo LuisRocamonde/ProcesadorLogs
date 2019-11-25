@@ -5,3 +5,13 @@
 .no-visible{
   display: none;
 }
+
+tr{
+  padding: 15px;
+}
+
+table{
+  border-collapse: separate;
+  border-spacing: 10px 5px;
+  margin: 0 auto;
+}

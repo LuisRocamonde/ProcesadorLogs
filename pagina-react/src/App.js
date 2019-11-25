@@ -13,8 +13,10 @@ class App extends Component {
       logs: [],
       valueNombre: '',
       valuePass: '',
-      nombreCorrecto:'luisr',
-      passCorrecta:'login'
+      nombreCorrecto:'carlos.peña',
+      passCorrecta:'login',
+      ultimaFirma: '',
+      ultimaFirmaDate: null
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -34,8 +36,34 @@ class App extends Component {
     } else{
       alert('PATRAS' + this.state.valuePass);
     }
-
+    this.actualizarLogs();
+    console.log("RECOGER")
+    this.recogerFirma();
     event.preventDefault();
+  }
+
+  recogerFirma(){
+    fetch("http://127.0.0.1:5000/ultimaFirma/" + this.state.valueNombre)
+      .then(res => res.toString())
+      .then(
+        (result) => {
+          console.log("RESULT FIRMA" + result + " " + typeof result)
+          this.setState({
+            ultimaFirma: result
+          });
+          console.log("RESULTITO " + this.setState.ultimaFirma)
+          //this.setState.ultimaFirma.map(firma =>(this.fechaUltimaFirma(firma)))
+        ;},
+        (error) => {
+          this.setState({
+            error
+          });
+        }
+      )
+      console.log("FIRMA")
+      var uF = this.state.ultimaFirma
+      //uF.map(firma =>(this.fechaUltimaFirma(firma)))
+      //console.log("FIRMA" + this.state.ultimaFirma.map(firma =>(this.epochToDate(firma["fecha"]))))
   }
 
   handleChange2(event) {
@@ -53,12 +81,12 @@ class App extends Component {
   }
 
 //Envia datos al servidor
-  handleClick(hash){
+  handleClick(hash, doctor){
     //const dataString = JSON.stringify(hash)
     //const hashedMessage = web3.keccak256("dataString");
     //console.log(hashedMessage)
     //const signedHash = account.sign(hashedMessage);
-    fetch('http://127.0.0.1:5000/test/' + hash,{'mode': 'no-cors', method: 'POST'})
+    fetch('http://127.0.0.1:5000/firma/' + doctor + '/' + hash,{'mode': 'no-cors', method: 'POST'})
   }
 
   isEmpty(obj) {
@@ -79,6 +107,7 @@ epochToDate(date){
   //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
   arrayElementos(log){
     var elementos = []
+    var elementos2 = []
     var valorNuevo = JSON.parse(log["value"])
     if(!this.isEmpty(valorNuevo)){
       console.log(log["value"])
@@ -90,7 +119,10 @@ epochToDate(date){
     log["timestamp"] = this.epochToDate(log["timestamp"]);
       for(var key in log){
         if(key==="elementReference" || key==="elementQualifier" || key==="value" || key==="agent" || key==="timestamp"){
-          elementos.push(key + " -> " + log[key])
+          elementos2.push(key.toUpperCase() )
+          elementos2.push(log[key])
+          elementos.push(elementos2)
+          elementos2 = []
         }
       }
 
@@ -98,8 +130,8 @@ epochToDate(date){
     return elementos
   }
 
-  componentDidMount() {
-    fetch("http://127.0.0.1:5000/logs/")
+  actualizarLogs() {
+    fetch("http://127.0.0.1:5000/logs/" + this.state.valueNombre)
       .then(res => res.json())
       .then(
         (result) => {
@@ -107,6 +139,7 @@ epochToDate(date){
           this.setState({
             logs: JSON.parse(result)
           });
+          console.log("RESULTADO LOG " + this.setState.logs)
         ;},
         (error) => {
           this.setState({
@@ -116,35 +149,35 @@ epochToDate(date){
       )
   }
 
-  obtenerMedico(logs){
-    var medico = "";
-    logs.map(log => (medico = log["agent"]))
-    return medico
+  fechaUltimaFirma(firma){
+      console.log("FECHA : " + firma)
+      return "OK "
   }
 
   render(){
-    const { error, isLoaded, logs, logeado } = this.state;
+    const { error, isLoaded, logs, logeado, ultimaFirma } = this.state;
     if(error){
       return <div>Error: {error.message}</div>;
     }
     else{
       if(logeado){
         if(logs){
+
           logs.map(log =>(this.eliminarNulos(log)))
           return (
 
             <div className="App">
             <ul className="horizontal">
 
-              <li>{this.obtenerMedico(logs)}</li>
-              <li className="rightli" style={{float:'right'}}>Ultima firma</li>
+              <li>{this.state.valueNombre}</li>
+              <li className="rightli" style={{float:'right'}}>OK</li>
             </ul>
             {logs.map(log => (
               <ul>
                <Categoria name={this.epochToDate(log["timestamp"])} items={this.arrayElementos(log)} icon="cube"/>
               </ul>
               ))}
-              <button onClick={this.handleClick.bind(this, JSON.stringify(logs))}>
+              <button onClick={this.handleClick.bind(this, JSON.stringify(logs), this.state.valueNombre)}>
               Firmar cambios
               </button>
             </div>
@@ -162,8 +195,8 @@ epochToDate(date){
         return(
           <div className="App">
           <ul className="horizontal">
-            <li>{this.obtenerMedico(logs)}</li>
-            <li className="rightli" style={{float:'right'}}>Ultima firma</li>
+            <li>PROCARDIA BLOCKCHAIN</li>
+            <li className="rightli" style={{float:'right'}}>Login</li>
           </ul>
 
             <form className="formulario" onSubmit={this.handleSubmit}>

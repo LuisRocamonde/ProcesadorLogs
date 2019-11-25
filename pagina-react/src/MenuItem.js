@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import './MenuItem.css'
 
 class MenuItem extends Component {
 
@@ -6,7 +7,8 @@ class MenuItem extends Component {
   return (
     <div className="MenuItem">
       <li>
-      <a href = '#'>{this.props.name}</a>
+      <td href = '#'>{this.props.name[0]}</td>
+      <td href = '#'>{this.props.name[1]}</td>
       </li>
     </div>
   );
