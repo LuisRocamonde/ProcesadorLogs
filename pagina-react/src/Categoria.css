@@ -12,6 +12,17 @@ tr{
 
 table{
   border-collapse: separate;
-  border-spacing: 10px 5px;
+  border-spacing:0px 5px;
   margin: 0 auto;
+}
+
+th{
+  color: black;
+  border: 2px solid black;
+  padding: 50px;
+  text-align: center;
+  width: 350px;
+  font-weight: bold;
+  vertical-align: middle;
+  background-color: #D3D3D3;
 }

@@ -24,11 +24,16 @@ handleClick(event){
       <li>
       <h3 onClick={this.handleClick.bind(this)}><Icon className="icon" name={this.props.icon}/>{this.props.name}</h3>
       <ul className={this.state.visible?'visible':'no-visible'}>
-      <table><tr>
-        {this.props.items.map((item)=>{
-          return  <MenuItem name={item}/>
-        })}
-        </tr></table>
+      <table>
+        <tr>
+          <th>VARIABLE</th>
+          <th>VALOR</th>
+        </tr>
+          {this.props.items.map((item)=>{
+            return  <MenuItem name={item}/>
+          })}
+
+      </table>
       </ul>
       </li>
     </div>

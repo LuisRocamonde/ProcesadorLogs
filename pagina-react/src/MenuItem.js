@@ -5,12 +5,12 @@ class MenuItem extends Component {
 
   render(){
   return (
-    <div className="MenuItem">
-      <li>
+
+      <tr>
       <td href = '#'>{this.props.name[0]}</td>
       <td href = '#'>{this.props.name[1]}</td>
-      </li>
-    </div>
+      </tr>
+
   );
 }}
 

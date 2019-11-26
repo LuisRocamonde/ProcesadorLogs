@@ -14,7 +14,7 @@ class App extends Component {
       valueNombre: '',
       valuePass: '',
       nombreCorrecto:'carlos.peña',
-      passCorrecta:'login',
+      passCorrecta:'admin',
       ultimaFirma: '',
       ultimaFirmaDate: null
     };
@@ -98,9 +98,16 @@ class App extends Component {
   }
 
 epochToDate(date){
-  var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-  d.setUTCSeconds(date);
-  return d.toString()
+  var d = new Date(date); // The 0 there is the key, which sets the date to the epoch
+  //d.setUTCSeconds(date);
+  var year = d.getFullYear();
+  var month = d.getMonth() + 1;
+  var day = d.getDate();
+  var hours = d.getHours();
+  var minutes = d.getMinutes();
+  var seconds = d.getSeconds();
+;
+  return day + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds;
 }
 
 
