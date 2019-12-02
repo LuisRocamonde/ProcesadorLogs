@@ -45,6 +45,7 @@ class User(Resource):
         data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}, "agent": doctor}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
+
         return resp
 
     @app.route('/firma/<doctor>/<text>', methods = ['POST'])
@@ -60,8 +61,9 @@ class User(Resource):
 
         tx = web3.get_tx(to=address, data=bytes(data_example, 'utf-8'))
         receipt = web3.transact(tx)
-        firmas.insert({"medico":doctor, "fecha": time(), "transactionHash":receipt["transactionHash"].hex()})
-
+        firmas.insert({"medico":doctor, "fecha": time(), "transactionHash":receipt["transactionHash"].hex(), "log":text})
+        print("prefixed_hash " + str(prefixed_hash.hex()))
+        print("signature " + str(signature))
         print("RECEIPT " + str(receipt["transactionHash"].hex()))
         return "OK"
 
@@ -78,6 +80,13 @@ class User(Resource):
         respF = Response(jsF, status=200, mimetype='application/json')
         print("FIRMA" + dataF);
         return new[11:-2]
+
+    @app.route('/busqueda/<doctor>/<variable>/<dataInicio>/<dataFin>', methods = ['GET'])
+    def busqueda(doctor,variable,dataInicio,dataFin):
+        dataI = int(dataInicio)
+        dataF = int(dataFin)
+        print("SALIDA " + doctor + "--" + variable + "--" + str(dataI) + "--" + str(dataF))
+        return "OK"
 
 api.add_resource(User, "/logs/")
 

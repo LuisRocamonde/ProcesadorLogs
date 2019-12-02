@@ -3,6 +3,7 @@ import Categoria from './Categoria'
 import './App.css'
 import web3 from 'web3'
 
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -29,12 +30,12 @@ class App extends Component {
 }
 
   handleSubmit(event) {
-    if(this.state.valueNombre==this.state.nombreCorrecto && this.state.valuePass==this.state.passCorrecta){
+    if(this.state.valueNombre===this.state.nombreCorrecto && this.state.valuePass===this.state.passCorrecta){
       this.setState({
         logeado: true
       });
     } else{
-      alert('PATRAS' + this.state.valuePass);
+      alert('ATRAS' + this.state.valuePass);
     }
     this.actualizarLogs();
     console.log("RECOGER")
@@ -51,7 +52,7 @@ class App extends Component {
           this.setState({
             ultimaFirma: result
           });
-          console.log("RESULTITO " + this.setState.ultimaFirma)
+          //console.log("RESULTITO " + this.setState.ultimaFirma)
           //this.setState.ultimaFirma.map(firma =>(this.fechaUltimaFirma(firma)))
         ;},
         (error) => {
@@ -184,7 +185,7 @@ epochToDate(date){
                <Categoria name={this.epochToDate(log["timestamp"])} items={this.arrayElementos(log)} icon="cube"/>
               </ul>
               ))}
-              <button onClick={this.handleClick.bind(this, JSON.stringify(logs), this.state.valueNombre)}>
+              <button onClick={this.handleClick.bind(this, JSON.stringify(logs), this.state.valueNombre)} className="botonFirma">
               Firmar cambios
               </button>
             </div>
