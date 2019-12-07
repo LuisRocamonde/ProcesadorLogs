@@ -15,7 +15,9 @@ class App extends Component {
       nombreCorrecto:'a',
       passCorrecta:'a',
       valueNombre: '',
-      logs: [],
+      trans: [],
+      logs:[],
+      datos: [],
       tx_hash: [],
       dataDefault: new Date(),
       dataInicio: new Date(),
@@ -54,19 +56,18 @@ class App extends Component {
   }
 
   handleSubmit(event) {
-    if(this.state.valueNombre==this.state.nombreCorrecto && this.state.valuePass==this.state.passCorrecta){
+    if(this.state.valueNombre===this.state.nombreCorrecto && this.state.valuePass===this.state.passCorrecta){
       this.setState({
         logeado: 1
       });
     } else{
       alert('ATRAS' + this.state.valuePass);
     }
-    this.actualizarLogs();
     event.preventDefault();
   }
 
   handleSubmit2(event) {
-    if(this.state.dataInicio<this.state.dataFin){
+    if(this.state.dataInicio<=this.state.dataFin){
       this.setState({
         logeado: 2
       });
@@ -78,34 +79,44 @@ class App extends Component {
         dataFin: this.state.dataDefault
       });
     }
-
+    this.recuperarLogs();
     event.preventDefault();
   }
 
   obtenerBusqueda(){
     fetch("http://127.0.0.1:5000/busqueda/" + this.state.valueDoctor + "/" + this.state.valueVariable + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.setState({
+          trans: JSON.parse(result)
+        });
+        console.log("\n\nRESULTADO LOG " + this.setState.logs)
+      ;},
+      (error) => {
+        this.setState({
+          error
+        });
+      }
+    )
   }
 
-  actualizarLogs() {
-    fetch("https://api.telsius.alastria.councilbox.com/api/transaction?value=0xc4ebda9d18b2741d885b881d0622aad4f7a7474b8b27bd783f4b24b5ed32caa3")
-      .then(res => res.json())
-      .then(
-        (result) => {
-
-          this.setState({
-            tx_hash: this.obtenerMapa(result)
-          });
-          console.log("TIPO LOG " + typeof(this.state.logs))
-          console.log("LOGS " + this.state.logs)
-
-        //  console.log("RESULTADO LOG " + this.obtenerMapa(result))
-        ;},
-        (error) => {
-          this.setState({
-            error
-          });
-        }
-      )
+  recuperarLogs(){
+    fetch("http://127.0.0.1:5000/busquedaLog/" + this.state.valueDoctor + "/" + this.state.valueVariable + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.setState({
+          logs: JSON.parse(result)
+        });
+        console.log("\n\nRESULTADO LOG " + this.setState.logs)
+      ;},
+      (error) => {
+        this.setState({
+          error
+        });
+      }
+    )
   }
 
   obtenerMapa(mapa){
@@ -124,20 +135,48 @@ class App extends Component {
     return mapaF
   }
 
+  eliminarNulos(log){
+    for(var key in log){
+      if(log[key]==null){
+        log[key]=""
+      }
+    }
+  }
+
+  parsearLogs(log){
+    var array = []
+    var arrayAux = []
+    var datos = this.state.datos
+    array.push(JSON.parse(log.log))
+    arrayAux = array[0]
+    for (var key in arrayAux){
+      this.eliminarNulos(arrayAux[key])
+      datos.push(arrayAux[key])
+    }
+    this.setState({
+      datos: datos
+    });
+  }
+
   render(){
     const {logeado, logs} = this.state;
     if(logeado === 2){
-      return (
-        <div className="App">
-          <ul className="horizontal">
-            <li>{this.state.valueNombre}</li>
-            <li className="rightli" style={{float:'right'}}>OK</li>
-          </ul>
-          <ul>
-           <Categoria name="PATATA" items={['UNO','DOS','TRES']} icon="cube"/>
-          </ul>
-        </div>
-      );
+      if(logs){
+        logs.map(log =>(this.parsearLogs(log)))
+        return (
+          <div className="App">
+            <ul className="horizontal">
+              <li>{this.state.valueNombre}</li>
+              <li className="rightli" style={{float:'right'}}>OK</li>
+            </ul>
+            {logs.map(log => (
+            <ul>
+             <Categoria name="PATATA" items={['UNO','DOS','TRES']} icon="cube"/>
+            </ul>
+            ))}
+          </div>
+        );
+      }
     }
     else if(logeado === 1){
       return (

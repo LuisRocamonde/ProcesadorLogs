@@ -13,6 +13,7 @@ from easyweb3 import EasyWeb3
 from eth_account.messages import defunct_hash_message
 from time import time
 from hexbytes import HexBytes
+import binascii
 
 app = Flask(__name__)
 api = Api(app)
@@ -50,21 +51,30 @@ class User(Resource):
 
     @app.route('/firma/<doctor>/<text>', methods = ['POST'])
     def firma(text, doctor):
-        prefixed_hash = defunct_hash_message(text=text)
-        web3 = EasyWeb3('UTC--2019-06-20T19-00-53.318093046Z--339593e2096135d7eb5c6ee964908c295d5ae241', 'root')
-        signature = web3.sign(text)
 
-        data_example = 'procardia_message:Proof registered by Procardia::procardia_proof:a3799f91e5495128a918f6c7f5aef65564384240824d81244244a4ecde60765d'
+        web3 = EasyWeb3('UTC--2019-06-20T19-00-53.318093046Z--339593e2096135d7eb5c6ee964908c295d5ae241', 'root')
+
+
+        #data_example = 'procardia_message:Proof registered by Procardia::procardia_proof:a3799f91e5495128a918f6c7f5aef65564384240824d81244244a4ecde60765d'
+
+        hasheado = EasyWeb3.hash(text)
+        print('\n\n\n' + "hasheado " + str(hasheado) + '\n\n\n')
+        data_example = 'procardia_message:Proof registered by Procardia::procardia_proof:' + str(hasheado)
 
         address = EasyWeb3.web3.toChecksumAddress('0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddea1')
         web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
 
         tx = web3.get_tx(to=address, data=bytes(data_example, 'utf-8'))
+        print('\n\n\n' + "TRANSACCION " + str(tx) + '\n\n\n')
         receipt = web3.transact(tx)
-        firmas.insert({"medico":doctor, "fecha": time(), "transactionHash":receipt["transactionHash"].hex(), "log":text})
-        print("prefixed_hash " + str(prefixed_hash.hex()))
-        print("signature " + str(signature))
-        print("RECEIPT " + str(receipt["transactionHash"].hex()))
+        firmas.insert({"medico":doctor, "fecha": time(), "transactionHash":receipt["transactionHash"].hex(), "hashLog":hasheado, "log":text})
+        trans = web3.eth.getTransaction(receipt["transactionHash"])
+        input = trans["input"]
+        hexa = hex(int(input, 16))
+        final = bytes.fromhex(hexa[2:]).decode('utf-8')
+        print('\n\n\n' + "RECEIPT " + str(final) + '\n\n\n')
+
+
         return "OK"
 
     @app.route('/ultimaFirma/<doctor>', methods = ['GET'])
@@ -85,8 +95,27 @@ class User(Resource):
     def busqueda(doctor,variable,dataInicio,dataFin):
         dataI = int(dataInicio)
         dataF = int(dataFin)
+        doctor="carlos.peña"
+        dataI=1575656460
+        dataF=1575656467
+        data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor}))
+        js = json.dumps(data)
+        resp = Response(js, status=200, mimetype='application/json')
         print("SALIDA " + doctor + "--" + variable + "--" + str(dataI) + "--" + str(dataF))
-        return "OK"
+        return resp
+
+    @app.route('/busquedaLog/<doctor>/<variable>/<dataInicio>/<dataFin>', methods = ['GET'])
+    def busquedaLog(doctor,variable,dataInicio,dataFin):
+        dataI = int(dataInicio)
+        dataF = int(dataFin)
+        doctor="carlos.peña"
+        dataI=1575656460
+        dataF=1575656467
+        data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1, "hashLog":1}))
+        js = json.dumps(data)
+        resp = Response(js, status=200, mimetype='application/json')
+        print("SALIDA " + data)
+        return resp
 
 api.add_resource(User, "/logs/")
 
