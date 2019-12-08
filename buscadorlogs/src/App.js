@@ -96,7 +96,7 @@ class App extends Component {
       (error) => {
         this.setState({
           error
-        });
+        })
       }
     )
   }
@@ -109,12 +109,11 @@ class App extends Component {
         this.setState({
           logs: JSON.parse(result)
         });
-        console.log("\n\nRESULTADO LOG " + this.setState.logs)
       ;},
       (error) => {
         this.setState({
           error
-        });
+        })
       }
     )
   }
@@ -144,22 +143,57 @@ class App extends Component {
   }
 
   parsearLogs(log){
-    var array = []
-    var arrayAux = []
-    var datos = this.state.datos
-    array.push(JSON.parse(log.log))
-    arrayAux = array[0]
-    for (var key in arrayAux){
-      this.eliminarNulos(arrayAux[key])
-      datos.push(arrayAux[key])
-    }
-    this.setState({
-      datos: datos
-    });
+      var array = []
+      var arrayAux = []
+      var datos = this.state.datos
+      array.push(JSON.parse(log.log))
+      arrayAux = array[0]
+      for (var key in arrayAux){
+        this.eliminarNulos(arrayAux[key])
+        var flag = true
+        for(var entry in datos){
+          if(JSON.stringify(arrayAux[key])===JSON.stringify(datos[entry])){
+            flag = false
+          }
+        }
+        if(flag){
+          datos.push(arrayAux[key])
+        }
+      }
+  }
+
+  epochToDate(date){
+    var d = new Date(date); // The 0 there is the key, which sets the date to the epoch
+    //d.setUTCSeconds(date);
+    var year = d.getFullYear();
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    var hours = d.getHours();
+    var minutes = d.getMinutes();
+    var seconds = d.getSeconds();
+  ;
+    return day + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds;
+  }
+
+  arrayElementos(log){
+    var elementos = []
+    var elementos2 = []
+    log["timestamp"] = this.epochToDate(log["timestamp"]);
+      for(var key in log){
+        if(key==="elementReference" || key==="elementQualifier" || key==="value" || key==="agent" || key==="timestamp"){
+          elementos2.push(key.toUpperCase() )
+          elementos2.push(log[key])
+          elementos.push(elementos2)
+          elementos2 = []
+        }
+      }
+
+
+    return elementos
   }
 
   render(){
-    const {logeado, logs} = this.state;
+    const {logeado, logs, datos} = this.state;
     if(logeado === 2){
       if(logs){
         logs.map(log =>(this.parsearLogs(log)))
@@ -169,9 +203,9 @@ class App extends Component {
               <li>{this.state.valueNombre}</li>
               <li className="rightli" style={{float:'right'}}>OK</li>
             </ul>
-            {logs.map(log => (
+            {datos.map(dato => (
             <ul>
-             <Categoria name="PATATA" items={['UNO','DOS','TRES']} icon="cube"/>
+             <Categoria name={dato["agent"]} items={this.arrayElementos(dato)} icon="cube"/>
             </ul>
             ))}
           </div>

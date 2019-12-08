@@ -23,6 +23,10 @@ db = con.procardiaLogs
 cuentas= db.logs
 db2 = con.dbFirmas
 firmas = db2.dbFirmas
+print ("Content-Type: text/turtle")
+print ("Content-Location: mydata.ttl")
+print ("Access-Control-Allow-Origin: *")
+print()
 EasyWeb3()
 
 def date1_to_epoch(data):
@@ -103,6 +107,8 @@ class User(Resource):
         resp = Response(js, status=200, mimetype='application/json')
         print("SALIDA " + doctor + "--" + variable + "--" + str(dataI) + "--" + str(dataF))
         return resp
+
+#Falta hacer la comprobacion de que el hash en la transaccion coincide con el hash guardado en bd
 
     @app.route('/busquedaLog/<doctor>/<variable>/<dataInicio>/<dataFin>', methods = ['GET'])
     def busquedaLog(doctor,variable,dataInicio,dataFin):
