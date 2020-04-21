@@ -21,6 +21,8 @@ CORS(app)
 con = MongoClient('localhost', 27017)
 db = con.procardiaLogs
 cuentas= db.logs
+#db = con.logsVictor
+#cuentas = db.logsDeVictor
 db2 = con.dbFirmas
 firmas = db2.dbFirmas
 print ("Content-Type: text/turtle")
@@ -36,6 +38,7 @@ def date2_to_epoch(data):
     data = data + timedelta(days=1)
     return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
 
+
 class User(Resource):
 
 
@@ -43,11 +46,16 @@ class User(Resource):
     @app.route('/logs/<doctor>', methods = ['GET'])
     def log(doctor):
         ahora = datetime.datetime.now()
-        principioDia = 1543271003852#date1_to_epoch(ahora)
+        principioDia = 1543271005520#date1_to_epoch(ahora)
 
-        finalDia = 1543271021191#date2_to_epoch(ahora)
-        #data = dumps(cuentas.find({"timestamp": 1543271003852}))
-        data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}, "agent": doctor}))
+        finalDia = 1543271027645#date2_to_epoch(ahora)
+        #data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}, "agent": doctor}))
+
+
+        dataF = dumps(firmas.find({"medico":doctor},{"_id":0, "fecha":1}).sort([( "_id", -1)]).limit(1))
+        ultimaFirma = float(dataF[11:-2])
+
+        data = dumps(cuentas.find({"timestamp": {'$gt': ultimaFirma}, "agent": doctor}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
 
@@ -85,18 +93,10 @@ class User(Resource):
     def ultimaFirma(doctor):
         dataF = dumps(firmas.find({"medico":doctor},{"_id":0, "fecha":1}).sort([( "_id", -1)]).limit(1))
 
-        new = ""
-        for x in dataF:
-            new += x
+        return dataF[11:-2]
 
-        dataUltimaFirma = float(new[11:-2]);
-        jsF = json.dumps(dataF)
-        respF = Response(jsF, status=200, mimetype='application/json')
-        print("FIRMA" + dataF);
-        return new[11:-2]
-
-    @app.route('/busqueda/<doctor>/<variable>/<dataInicio>/<dataFin>', methods = ['GET'])
-    def busqueda(doctor,variable,dataInicio,dataFin):
+    @app.route('/busqueda/<doctor>/<dataInicio>/<dataFin>', methods = ['GET'])
+    def busqueda(doctor,dataInicio,dataFin):
         dataI = int(dataInicio)
         dataF = int(dataFin)
         doctor="carlos.peña"
@@ -105,19 +105,20 @@ class User(Resource):
         data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
-        print("SALIDA " + doctor + "--" + variable + "--" + str(dataI) + "--" + str(dataF))
+        print("SALIDA " + doctor + "--" + str(dataI) + "--" + str(dataF))
         return resp
 
 #Falta hacer la comprobacion de que el hash en la transaccion coincide con el hash guardado en bd
 
-    @app.route('/busquedaLog/<doctor>/<variable>/<dataInicio>/<dataFin>', methods = ['GET'])
-    def busquedaLog(doctor,variable,dataInicio,dataFin):
+    @app.route('/busquedaLog/<doctor>/<dataInicio>/<dataFin>', methods = ['GET'])
+    def busquedaLog(doctor,dataInicio,dataFin):
         dataI = int(dataInicio)
         dataF = int(dataFin)
         doctor="carlos.peña"
         dataI=1575656460
         dataF=1575656467
         data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1, "hashLog":1}))
+        data2 = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1}))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
         print("SALIDA " + data)

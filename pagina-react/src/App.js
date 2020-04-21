@@ -35,7 +35,7 @@ class App extends Component {
         logeado: true
       });
     } else{
-      alert('ATRAS' + this.state.valuePass);
+      alert('PASSWORD INCORRECTA');
     }
     this.actualizarLogs();
     console.log("RECOGER")
@@ -88,6 +88,9 @@ class App extends Component {
     //console.log(hashedMessage)
     //const signedHash = account.sign(hashedMessage);
     fetch('http://127.0.0.1:5000/firma/' + doctor + '/' + hash,{'mode': 'no-cors', method: 'POST'})
+    this.setState({
+      logeado: false
+    });
   }
 
   isEmpty(obj) {
@@ -111,16 +114,24 @@ epochToDate(date){
   return day + "-" + month + "-" + year + " " + hours + ":" + minutes + ":" + seconds;
 }
 
+obtenerValor(valor){
+  for(var key in valor){
+          if(valor[key][0]=="value" || valor[key][0]=="stringValue" || valor[key][0]=="booleanValue"){
+            return valor[key][1].toString();
+          }
+  }
+  return null;
+}
 
-  //Devuelve un array de elementos con los varoles a mostrar en formato apropiado
+  //Devuelve un array de elementos cotruen los varoles a mostrar en formato apropiado
   arrayElementos(log){
     var elementos = []
     var elementos2 = []
     var valorNuevo = JSON.parse(log["value"])
     if(!this.isEmpty(valorNuevo)){
-      console.log(log["value"])
       var valor = Object.entries(valorNuevo[0])
-      log["value"] = valor[1].toString().substring(valor[1].toString().indexOf(',')+1);
+      log["value"] = this.obtenerValor(valor)
+      //log["value"] = valor[1].toString().substring(valor[1].toString().indexOf(',')+1);
     } else{
       log["value"] = "null"
     }
@@ -137,6 +148,8 @@ epochToDate(date){
 
     return elementos
   }
+
+
 
   actualizarLogs() {
     fetch("http://127.0.0.1:5000/logs/" + this.state.valueNombre)
@@ -178,7 +191,7 @@ epochToDate(date){
             <ul className="horizontal">
 
               <li>{this.state.valueNombre}</li>
-              <li className="rightli" style={{float:'right'}}>OK</li>
+              <li className="rightli" style={{float:'right'}}></li>
             </ul>
             {logs.map(log => (
               <ul>

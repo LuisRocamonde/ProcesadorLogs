@@ -29,7 +29,7 @@ handleClick(event){
           <th>VARIABLE</th>
           <th>VALOR</th>
         </tr>
-        
+
        {this.props.items.map((item)=>{
             return  <MenuItem name={item}/>
           })}

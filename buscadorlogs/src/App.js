@@ -5,15 +5,17 @@ import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import DatePicker from 'react-date-picker';
 
+
+
 class App extends Component {
   constructor(props){
     super(props);
     this.state = {
       logueado: 0,
-      //nombreCorrecto:'carlos.peña',
-      //passCorrecta:'admin',
-      nombreCorrecto:'a',
-      passCorrecta:'a',
+      nombreCorrecto:'carlos.peña',
+      passCorrecta:'admin',
+      //nombreCorrecto:'a',
+      //passCorrecta:'a',
       valueNombre: '',
       trans: [],
       logs:[],
@@ -22,8 +24,7 @@ class App extends Component {
       dataDefault: new Date(),
       dataInicio: new Date(),
       dataFin: new Date(),
-      valueDoctor: '',
-      valueVariable: ''
+      valueDoctor: ''
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -31,7 +32,6 @@ class App extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleChange2 = this.handleChange2.bind(this);
     this.handleChange3 = this.handleChange3.bind(this);
-    this.handleChange4 = this.handleChange4.bind(this);
 
   }
 
@@ -51,17 +51,13 @@ class App extends Component {
     this.setState({valueDoctor: event.target.value});
   }
 
-  handleChange4(event) {
-    this.setState({valueVariable: event.target.value});
-  }
-
   handleSubmit(event) {
     if(this.state.valueNombre===this.state.nombreCorrecto && this.state.valuePass===this.state.passCorrecta){
       this.setState({
         logeado: 1
       });
     } else{
-      alert('ATRAS' + this.state.valuePass);
+      alert('PASSWORD INCORRECTA');
     }
     event.preventDefault();
   }
@@ -84,14 +80,13 @@ class App extends Component {
   }
 
   obtenerBusqueda(){
-    fetch("http://127.0.0.1:5000/busqueda/" + this.state.valueDoctor + "/" + this.state.valueVariable + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
+    fetch("http://127.0.0.1:5000/busqueda/" + this.state.valueDoctor + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
     .then(res => res.json())
     .then(
       (result) => {
         this.setState({
           trans: JSON.parse(result)
         });
-        console.log("\n\nRESULTADO LOG " + this.setState.logs)
       ;},
       (error) => {
         this.setState({
@@ -102,7 +97,7 @@ class App extends Component {
   }
 
   recuperarLogs(){
-    fetch("http://127.0.0.1:5000/busquedaLog/" + this.state.valueDoctor + "/" + this.state.valueVariable + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
+    fetch("http://127.0.0.1:5000/busquedaLog/" + this.state.valueDoctor + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
     .then(res => res.json())
     .then(
       (result) => {
@@ -178,15 +173,14 @@ class App extends Component {
   arrayElementos(log){
     var elementos = []
     var elementos2 = []
-    log["timestamp"] = this.epochToDate(log["timestamp"]);
-      for(var key in log){
-        if(key==="elementReference" || key==="elementQualifier" || key==="value" || key==="agent" || key==="timestamp"){
-          elementos2.push(key.toUpperCase() )
-          elementos2.push(log[key])
-          elementos.push(elementos2)
-          elementos2 = []
-        }
+    for(var key in log){
+      if(key==="elementReference" || key==="elementQualifier" || key==="value" || key==="agent" || key==="timestamp"){
+        elementos2.push(key.toUpperCase() )
+        elementos2.push(log[key])
+        elementos.push(elementos2)
+        elementos2 = []
       }
+    }
 
 
     return elementos
@@ -201,11 +195,11 @@ class App extends Component {
           <div className="App">
             <ul className="horizontal">
               <li>{this.state.valueNombre}</li>
-              <li className="rightli" style={{float:'right'}}>OK</li>
+              <li className="rightli" style={{float:'right'}}></li>
             </ul>
             {datos.map(dato => (
             <ul>
-             <Categoria name={dato["agent"]} items={this.arrayElementos(dato)} icon="cube"/>
+             <Categoria name={dato["timestamp"]} items={this.arrayElementos(dato)} icon="cube"/>
             </ul>
             ))}
           </div>
@@ -217,7 +211,7 @@ class App extends Component {
         <div className="App">
         <ul className="horizontal">
           <li>PROCARDIA BUSCADOR</li>
-          <li className="rightli" style={{float:'right'}}>Login</li>
+          <li className="rightli" style={{float:'right'}}>Seleccione las fechas</li>
         </ul>
 
           <form className="formulario" onSubmit={this.handleSubmit2}>
@@ -227,8 +221,6 @@ class App extends Component {
             <label className="labelFecha">Fecha Fin</label>
             <DatePicker className="fechaInicio" onChange={this.onChangeI} value={this.state.dataInicio}/>
             <DatePicker className="fechaFin" onChange={this.onChangeF} value={this.state.dataFin}/>
-            <label className="labelVariable">Variable</label>
-            <input className="textoVariable" type="password" value={this.state.valueVariable} onChange={this.handleChange4} required size="20"/>
             <input className="submit" type="submit" value="Realizar Busqueda"/>
           </form>
         </div>
@@ -238,7 +230,7 @@ class App extends Component {
       return(
         <div className="App">
         <ul className="horizontal">
-          <li>PROCARDIA BLOCKCHAIN</li>
+          <li>PROCARDIA BUSCADOR</li>
           <li className="rightli" style={{float:'right'}}>Login</li>
         </ul>
 
