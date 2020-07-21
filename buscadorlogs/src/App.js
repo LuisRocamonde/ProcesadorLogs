@@ -174,7 +174,7 @@ class App extends Component {
     var elementos = []
     var elementos2 = []
     for(var key in log){
-      if(key==="elementReference" || key==="elementQualifier" || key==="value" || key==="agent" || key==="timestamp"){
+      if(key==="elementReference" || key==="value" || key==="agent" || key==="timestamp"){
         elementos2.push(key.toUpperCase() )
         elementos2.push(log[key])
         elementos.push(elementos2)

@@ -62,7 +62,7 @@ class App extends Component {
         }
       )
       console.log("FIRMA")
-      var uF = this.state.ultimaFirma
+      var  uF = this.state.ultimaFirma
       //uF.map(firma =>(this.fechaUltimaFirma(firma)))
       //console.log("FIRMA" + this.state.ultimaFirma.map(firma =>(this.epochToDate(firma["fecha"]))))
   }
@@ -116,7 +116,29 @@ epochToDate(date){
 
 obtenerValor(valor){
   for(var key in valor){
-          if(valor[key][0]=="value" || valor[key][0]=="stringValue" || valor[key][0]=="booleanValue"){
+          if(valor[key][0]==="value" || valor[key][0]==="stringValue" || valor[key][0]==="booleanValue" || valor[key][0]==="integerValue" || valor[key][0]==="colesterolTotal" || valor[key][0]==="glucemia"){
+            if(valor[key][0]==="colesterolTotal"){
+              var arrayColesterol = []
+              for(var i=0; i < 4; i++){
+                if(valor[key][1]===null){
+                  valor[key][1]="NaN"
+                }
+                arrayColesterol.push(valor[key][0].toString() + ":" + valor[key][1].toString() + "  ")
+                key++
+              }
+              return arrayColesterol;
+            }
+            else if(valor[key][0]==="glucemia"){
+              var arrayGlucemia = []
+              for(var i=0; i < 2; i++){
+                if(valor[key][1]===null){
+                  valor[key][1]="NaN"
+                }
+                arrayGlucemia.push(valor[key][0].toString() + ":" + valor[key][1].toString() + "  ")
+                key++
+              }
+              return arrayGlucemia;
+            }
             return valor[key][1].toString();
           }
   }
@@ -130,6 +152,9 @@ obtenerValor(valor){
     var valorNuevo = JSON.parse(log["value"])
     if(!this.isEmpty(valorNuevo)){
       var valor = Object.entries(valorNuevo[0])
+      if(log["elementReference"]==="dieta"){
+        console.log("PARA AQUI")
+      }
       log["value"] = this.obtenerValor(valor)
       //log["value"] = valor[1].toString().substring(valor[1].toString().indexOf(',')+1);
     } else{
@@ -137,7 +162,10 @@ obtenerValor(valor){
     }
     log["timestamp"] = this.epochToDate(log["timestamp"]);
       for(var key in log){
-        if(key==="elementReference" || key==="elementQualifier" || key==="value" || key==="agent" || key==="timestamp"){
+        if(key==="elementReference" || key==="value" || key==="agent" || key==="timestamp"){
+          if(log[key] === "analitica_lipidos"){
+            console.log("JUST TESTING")
+          }
           elementos2.push(key.toUpperCase() )
           elementos2.push(log[key])
           elementos.push(elementos2)

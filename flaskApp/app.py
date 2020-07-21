@@ -19,12 +19,13 @@ app = Flask(__name__)
 api = Api(app)
 CORS(app)
 con = MongoClient('localhost', 27017)
-db = con.procardiaLogs
-cuentas= db.logs
-#db = con.logsVictor
-#cuentas = db.logsDeVictor
+#db = con.procardiaLogs
+#cuentas= db.logs
+db = con.logsVictor
+cuentas = db.logsDeVictor
 db2 = con.dbFirmas
 firmas = db2.dbFirmas
+marcaAgua = 'procardia_message:Proof_registered_by_Procardia::procardia_proof: '
 print ("Content-Type: text/turtle")
 print ("Content-Location: mydata.ttl")
 print ("Access-Control-Allow-Origin: *")
@@ -38,6 +39,10 @@ def date2_to_epoch(data):
     data = data + timedelta(days=1)
     return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
 
+def resetDia(fechaEpoch):
+    fechaData = datetime.datetime.fromtimestamp(int(fechaEpoch)/1000)
+
+    return datetime.datetime(fechaData.year, fechaData.month, fechaData.day, 00,00).timestamp()
 
 class User(Resource):
 
@@ -48,14 +53,18 @@ class User(Resource):
         ahora = datetime.datetime.now()
         principioDia = 1543271005520#date1_to_epoch(ahora)
 
-        finalDia = 1543271027645#date2_to_epoch(ahora)
+        finalDia = 1543271027645#date2_to_epoch(ahora)ELSE
         #data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}, "agent": doctor}))
 
 
         dataF = dumps(firmas.find({"medico":doctor},{"_id":0, "fecha":1}).sort([( "_id", -1)]).limit(1))
-        ultimaFirma = float(dataF[11:-2])
-
-        data = dumps(cuentas.find({"timestamp": {'$gt': ultimaFirma}, "agent": doctor}))
+        #Check por si no existen datos en la BD de firmas
+        if dataF == '[]':
+            ultimaFirma = 0
+        else:
+            ultimaFirma = float(dataF[11:-2])
+        print("ULTIMAFIRMA: " + str(ultimaFirma))
+        data = dumps(cuentas.find({"timestamp": {'$gt': ultimaFirma}, "agent": doctor}).limit(50))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
 
@@ -71,7 +80,7 @@ class User(Resource):
 
         hasheado = EasyWeb3.hash(text)
         print('\n\n\n' + "hasheado " + str(hasheado) + '\n\n\n')
-        data_example = 'procardia_message:Proof registered by Procardia::procardia_proof:' + str(hasheado)
+        data_example = marcaAgua + str(hasheado)
 
         address = EasyWeb3.web3.toChecksumAddress('0xdeaddeaddeaddeaddeaddeaddeaddeaddeaddea1')
         web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
@@ -79,7 +88,7 @@ class User(Resource):
         tx = web3.get_tx(to=address, data=bytes(data_example, 'utf-8'))
         print('\n\n\n' + "TRANSACCION " + str(tx) + '\n\n\n')
         receipt = web3.transact(tx)
-        firmas.insert({"medico":doctor, "fecha": time(), "transactionHash":receipt["transactionHash"].hex(), "hashLog":hasheado, "log":text})
+        firmas.insert({"medico":doctor, "fecha": time()*1000, "transactionHash":receipt["transactionHash"].hex(), "hashLog":hasheado, "log":text})
         trans = web3.eth.getTransaction(receipt["transactionHash"])
         input = trans["input"]
         hexa = hex(int(input, 16))
@@ -100,9 +109,9 @@ class User(Resource):
         dataI = int(dataInicio)
         dataF = int(dataFin)
         doctor="carlos.peña"
-        dataI=1575656460
-        dataF=1575656467
+
         data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor}))
+        print("DATA POST:" + data)
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
         print("SALIDA " + doctor + "--" + str(dataI) + "--" + str(dataF))
@@ -112,16 +121,37 @@ class User(Resource):
 
     @app.route('/busquedaLog/<doctor>/<dataInicio>/<dataFin>', methods = ['GET'])
     def busquedaLog(doctor,dataInicio,dataFin):
-        dataI = int(dataInicio)
+        dataI = resetDia(dataInicio)
         dataF = int(dataFin)
+        print("INICIO-FIN " + str(dataI) + " " + str(dataF))
         doctor="carlos.peña"
-        dataI=1575656460
-        dataF=1575656467
+        #dataI=1586565646
+        #dataF=1588656467
+
+        #Obteh o log firmado na transaccion e o seu hash
         data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1, "hashLog":1}))
-        data2 = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1}))
+        transaccion = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"transactionHash":1}))
+
+        print("TRANSACCION " + str(dataI))
+        print("FIRMA " + str(json.loads(transaccion)[0]["transactionHash"]))
+
+        web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
+
+        trHash = str(json.loads(transaccion)[0]["transactionHash"])
+        trans = web3.eth.getTransaction(trHash)
+        input = trans["input"]
+        hexa = hex(int(input, 16))
+        final = bytes.fromhex(hexa[2:]).decode('utf-8')
+        splt = str(final).split()
+
+        print('\n\n\n' + "RECEIPT " + splt[1] + '\n\n\n')
+
+
+
+
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
-        print("SALIDA " + data)
+        #print("SALIDA " + data)
         return resp
 
 api.add_resource(User, "/logs/")
