@@ -39,10 +39,29 @@ def date2_to_epoch(data):
     data = data + timedelta(days=1)
     return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
 
-def resetDia(fechaEpoch):
+def inicioDia(fechaEpoch):
     fechaData = datetime.datetime.fromtimestamp(int(fechaEpoch)/1000)
 
     return datetime.datetime(fechaData.year, fechaData.month, fechaData.day, 00,00).timestamp()
+
+def finDia(fechaEpoch):
+    fechaData = datetime.datetime.fromtimestamp(int(fechaEpoch)/1000)
+
+    return datetime.datetime(fechaData.year, fechaData.month, fechaData.day, 23,59).timestamp()
+
+def recuperarTransHash(trans):
+    web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
+
+    trHash = str(json.loads(trans)[0]["transactionHash"])
+    trans = web3.eth.getTransaction(trHash)
+    input = trans["input"]
+    hexa = hex(int(input, 16))
+    final = bytes.fromhex(hexa[2:]).decode('utf-8')
+    splt = str(final).split()
+    return splt[1]
+
+def recuperarHashLog(hashLog):
+    return str(json.loads(hashLog)[0]["hashLog"])
 
 class User(Resource):
 
@@ -121,8 +140,8 @@ class User(Resource):
 
     @app.route('/busquedaLog/<doctor>/<dataInicio>/<dataFin>', methods = ['GET'])
     def busquedaLog(doctor,dataInicio,dataFin):
-        dataI = resetDia(dataInicio)
-        dataF = int(dataFin)
+        dataI = inicioDia(dataInicio)*1000
+        dataF = finDia(dataFin)*1000
         print("INICIO-FIN " + str(dataI) + " " + str(dataF))
         doctor="carlos.peña"
         #dataI=1586565646
@@ -132,22 +151,12 @@ class User(Resource):
         data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1, "hashLog":1}))
         transaccion = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"transactionHash":1}))
 
-        print("TRANSACCION " + str(dataI))
-        print("FIRMA " + str(json.loads(transaccion)[0]["transactionHash"]))
-
-        web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
-
-        trHash = str(json.loads(transaccion)[0]["transactionHash"])
-        trans = web3.eth.getTransaction(trHash)
-        input = trans["input"]
-        hexa = hex(int(input, 16))
-        final = bytes.fromhex(hexa[2:]).decode('utf-8')
-        splt = str(final).split()
-
-        print('\n\n\n' + "RECEIPT " + splt[1] + '\n\n\n')
-
-
-
+        if transaccion != '[]':
+            print("TRANSACCION " + str(transaccion))
+            print('\n' + "RECEIPT " + recuperarTransHash(transaccion) + '\n')
+            print('\n' + "HASHLOG " + recuperarHashLog(data) + '\n')
+            if(recuperarTransHash(transaccion) == recuperarHashLog(data)):
+                return "[{falseData}]";
 
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')

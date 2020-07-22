@@ -92,6 +92,13 @@ ul.horizontal li{
   color: black;
 }
 
+.NoData{
+  color: black;
+  display: block;
+  text-align: center;
+  line-height: 150%;
+}
+
 .labelUsuario{
   color: black;
 }

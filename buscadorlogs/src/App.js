@@ -79,6 +79,15 @@ class App extends Component {
     event.preventDefault();
   }
 
+  handleSubmit3(event) {
+
+      this.setState({
+        logeado: 0
+      });
+
+    event.preventDefault();
+  }
+
   obtenerBusqueda(){
     fetch("http://127.0.0.1:5000/busqueda/" + this.state.valueDoctor + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
     .then(res => res.json())
@@ -189,7 +198,7 @@ class App extends Component {
   render(){
     const {logeado, logs, datos} = this.state;
     if(logeado === 2){
-      if(logs){
+      if(logs != ''){
         logs.map(log =>(this.parsearLogs(log)))
         return (
           <div className="App">
@@ -202,6 +211,19 @@ class App extends Component {
              <Categoria name={dato["timestamp"]} items={this.arrayElementos(dato)} icon="cube"/>
             </ul>
             ))}
+          </div>
+        );
+      }
+      else {
+        return (
+          <div className="App">
+          <ul className="horizontal">
+            <li>PROCARDIA BUSCADOR</li>
+          </ul>
+            <form className="formulario" onSubmit={this.handleSubmit3}>
+              <label className="NoData">No hay datos</label>
+              <input className="submit" type="submit" value="Volver"/>
+            </form>
           </div>
         );
       }
