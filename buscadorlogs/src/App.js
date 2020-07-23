@@ -67,7 +67,6 @@ class App extends Component {
       this.setState({
         logeado: 2
       });
-      this.obtenerBusqueda();
     } else{
       alert('ATRAS FECHAS MAL');
       this.setState({
@@ -88,31 +87,19 @@ class App extends Component {
     event.preventDefault();
   }
 
-  obtenerBusqueda(){
-    fetch("http://127.0.0.1:5000/busqueda/" + this.state.valueDoctor + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
-    .then(res => res.json())
-    .then(
-      (result) => {
-        this.setState({
-          trans: JSON.parse(result)
-        });
-      ;},
-      (error) => {
-        this.setState({
-          error
-        })
-      }
-    )
-  }
-
   recuperarLogs(){
     fetch("http://127.0.0.1:5000/busquedaLog/" + this.state.valueDoctor + "/" + this.state.dataInicio.getTime() + "/" + this.state.dataFin.getTime())
     .then(res => res.json())
     .then(
       (result) => {
+        if(result==="[{data:falseData}]"){
+          this.setState({
+            logeado: 3
+          });
+        } else{
         this.setState({
           logs: JSON.parse(result)
-        });
+        });}
       ;},
       (error) => {
         this.setState({
@@ -199,20 +186,20 @@ class App extends Component {
     const {logeado, logs, datos} = this.state;
     if(logeado === 2){
       if(logs != ''){
-        logs.map(log =>(this.parsearLogs(log)))
-        return (
-          <div className="App">
-            <ul className="horizontal">
-              <li>{this.state.valueNombre}</li>
-              <li className="rightli" style={{float:'right'}}></li>
-            </ul>
-            {datos.map(dato => (
-            <ul>
-             <Categoria name={dato["timestamp"]} items={this.arrayElementos(dato)} icon="cube"/>
-            </ul>
-            ))}
-          </div>
-        );
+          logs.map(log =>(this.parsearLogs(log)))
+          return (
+            <div className="App">
+              <ul className="horizontal">
+                <li>{this.state.valueNombre}</li>
+                <li className="rightli" style={{float:'right'}}></li>
+              </ul>
+              {datos.map(dato => (
+              <ul>
+               <Categoria name={dato["timestamp"]} items={this.arrayElementos(dato)} icon="cube"/>
+              </ul>
+              ))}
+            </div>
+          );
       }
       else {
         return (
@@ -244,6 +231,19 @@ class App extends Component {
             <DatePicker className="fechaInicio" onChange={this.onChangeI} value={this.state.dataInicio}/>
             <DatePicker className="fechaFin" onChange={this.onChangeF} value={this.state.dataFin}/>
             <input className="submit" type="submit" value="Realizar Busqueda"/>
+          </form>
+        </div>
+      );
+    }
+    else if(logeado === 3){
+      return (
+        <div className="App">
+        <ul className="horizontal">
+          <li>PROCARDIA BUSCADOR</li>
+        </ul>
+          <form className="formulario" onSubmit={this.handleSubmit3}>
+            <label className="NoData">LOS HASHES NO COINCIDEN!</label>
+            <input className="submit" type="submit" value="Volver"/>
           </form>
         </div>
       );

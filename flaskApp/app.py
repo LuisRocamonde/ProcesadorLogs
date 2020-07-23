@@ -32,23 +32,26 @@ print ("Access-Control-Allow-Origin: *")
 print()
 EasyWeb3()
 
+#Reinicia la fecha guardada en DATA para que sean las 00:00 del día
 def date1_to_epoch(data):
     return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
 
+#Reinicia la fecha guardada en DATA para que sean las 00:00 del día siguiente
 def date2_to_epoch(data):
     data = data + timedelta(days=1)
     return datetime.datetime(data.year, data.month, data.day, 00, 00).timestamp()
 
+#Transforma la fecha en formato epoch en FECHAEPOCH y la reinicia para que sean las 00:00 del dia
 def inicioDia(fechaEpoch):
     fechaData = datetime.datetime.fromtimestamp(int(fechaEpoch)/1000)
-
     return datetime.datetime(fechaData.year, fechaData.month, fechaData.day, 00,00).timestamp()
 
+#Transforma la fecha en formato epoch en FECHAEPOCH y la reinicia para que sean las 00:00 del dia siguiente
 def finDia(fechaEpoch):
     fechaData = datetime.datetime.fromtimestamp(int(fechaEpoch)/1000)
-
     return datetime.datetime(fechaData.year, fechaData.month, fechaData.day, 23,59).timestamp()
 
+#Recupera del JSON el hash de los datos añadidos en la transacción
 def recuperarTransHash(trans):
     web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
 
@@ -60,13 +63,14 @@ def recuperarTransHash(trans):
     splt = str(final).split()
     return splt[1]
 
+#Recupera del JSON el hash del log
 def recuperarHashLog(hashLog):
     return str(json.loads(hashLog)[0]["hashLog"])
 
 class User(Resource):
 
-
-#1543271005520
+    #Recupera los logs del ultimo dia para firmar, de momento el dia está fijo para recibir los datos disponibles en la BD
+    #Si estuviera conectado a la BD de PROCARDIA se podría
     @app.route('/logs/<doctor>', methods = ['GET'])
     def log(doctor):
         ahora = datetime.datetime.now()
@@ -75,27 +79,25 @@ class User(Resource):
         finalDia = 1543271027645#date2_to_epoch(ahora)ELSE
         #data = dumps(cuentas.find({"timestamp": {'$gt': principioDia, '$lt':finalDia}, "agent": doctor}))
 
-
+        #Recupera la fecha de la última firma. Las firmas están ordenadas por fecha en orden descendente.
         dataF = dumps(firmas.find({"medico":doctor},{"_id":0, "fecha":1}).sort([( "_id", -1)]).limit(1))
         #Check por si no existen datos en la BD de firmas
         if dataF == '[]':
             ultimaFirma = 0
         else:
             ultimaFirma = float(dataF[11:-2])
-        print("ULTIMAFIRMA: " + str(ultimaFirma))
+        #Recuperamos los datos de logs desde la fecha de ultima firma
         data = dumps(cuentas.find({"timestamp": {'$gt': ultimaFirma}, "agent": doctor}).limit(50))
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
 
         return resp
 
+    #Firma los logs. Actualiza la BD de firmas. Envia los logs firmados a la red blockchain
     @app.route('/firma/<doctor>/<text>', methods = ['POST'])
     def firma(text, doctor):
 
         web3 = EasyWeb3('UTC--2019-06-20T19-00-53.318093046Z--339593e2096135d7eb5c6ee964908c295d5ae241', 'root')
-
-
-        #data_example = 'procardia_message:Proof registered by Procardia::procardia_proof:a3799f91e5495128a918f6c7f5aef65564384240824d81244244a4ecde60765d'
 
         hasheado = EasyWeb3.hash(text)
         print('\n\n\n' + "hasheado " + str(hasheado) + '\n\n\n')
@@ -105,62 +107,41 @@ class User(Resource):
         web3 = EasyWeb3('wallet.json', http_provider='http://65.52.226.126:22000', proof_of_authority=True)
 
         tx = web3.get_tx(to=address, data=bytes(data_example, 'utf-8'))
-        print('\n\n\n' + "TRANSACCION " + str(tx) + '\n\n\n')
+
         receipt = web3.transact(tx)
         firmas.insert({"medico":doctor, "fecha": time()*1000, "transactionHash":receipt["transactionHash"].hex(), "hashLog":hasheado, "log":text})
-        trans = web3.eth.getTransaction(receipt["transactionHash"])
-        input = trans["input"]
-        hexa = hex(int(input, 16))
-        final = bytes.fromhex(hexa[2:]).decode('utf-8')
-        print('\n\n\n' + "RECEIPT " + str(final) + '\n\n\n')
-
 
         return "OK"
 
+    #Recupera la ultima fecha en la que el doctor ha firmado
     @app.route('/ultimaFirma/<doctor>', methods = ['GET'])
     def ultimaFirma(doctor):
         dataF = dumps(firmas.find({"medico":doctor},{"_id":0, "fecha":1}).sort([( "_id", -1)]).limit(1))
 
         return dataF[11:-2]
 
-    @app.route('/busqueda/<doctor>/<dataInicio>/<dataFin>', methods = ['GET'])
-    def busqueda(doctor,dataInicio,dataFin):
-        dataI = int(dataInicio)
-        dataF = int(dataFin)
-        doctor="carlos.peña"
-
-        data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor}))
-        print("DATA POST:" + data)
-        js = json.dumps(data)
-        resp = Response(js, status=200, mimetype='application/json')
-        print("SALIDA " + doctor + "--" + str(dataI) + "--" + str(dataF))
-        return resp
-
-#Falta hacer la comprobacion de que el hash en la transaccion coincide con el hash guardado en bd
-
+    #Obtiene los logs firmados entre la data de inicio y la data de fin de los parámetros
     @app.route('/busquedaLog/<doctor>/<dataInicio>/<dataFin>', methods = ['GET'])
     def busquedaLog(doctor,dataInicio,dataFin):
-        dataI = inicioDia(dataInicio)*1000
+        dataI = inicioDia(dataInicio)*1000  #La funcion lo devuelve en segundos y en la BD esta guardado en milisegundos
         dataF = finDia(dataFin)*1000
-        print("INICIO-FIN " + str(dataI) + " " + str(dataF))
-        doctor="carlos.peña"
         #dataI=1586565646
         #dataF=1588656467
 
-        #Obteh o log firmado na transaccion e o seu hash
+        #Obtiene el log firmado en la transacción y su hash
         data = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"log":1, "hashLog":1}))
+        #Obtiene el hash de la transaccion para recuperar los datos de la red blockchain
         transaccion = dumps(firmas.find({"fecha": {'$gt': dataI, '$lt':dataF}, "medico":doctor},{"transactionHash":1}))
 
+        #Comprobacion para evitar errores si la BD no tiene entradas aun
         if transaccion != '[]':
-            print("TRANSACCION " + str(transaccion))
-            print('\n' + "RECEIPT " + recuperarTransHash(transaccion) + '\n')
-            print('\n' + "HASHLOG " + recuperarHashLog(data) + '\n')
-            if(recuperarTransHash(transaccion) == recuperarHashLog(data)):
-                return "[{falseData}]";
+            #Comprueba si el hash inicial es igual al guardado actualmente en la red blockchain
+            if(recuperarTransHash(transaccion) != recuperarHashLog(data)):
+                data = "[{data:falseData}]";
 
         js = json.dumps(data)
         resp = Response(js, status=200, mimetype='application/json')
-        #print("SALIDA " + data)
+        print("SALIDA " + str(data))
         return resp
 
 api.add_resource(User, "/logs/")
