@@ -1,0 +1,11 @@
+Vista transacción:
+cbx-quorum-explorer/webapp/src/components/Transactions/Transaction.js
+
+API URL:
+cbx-quorum-explorer/webapp/src/config.js
+
+Logo / colores:
+cbx-quorum-explorer/webapp/src/versions.js
+
+Versión:
+cbx-quorum-explorer/webapp/package.json
